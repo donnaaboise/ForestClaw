@@ -1142,12 +1142,13 @@ size_t clawpatch_partition_packsize(fclaw2d_global_t* glob)
 	int mbc = clawpatch_opt->mbc;
 	int meqn = clawpatch_opt->meqn;
 
+	size_t psize = (2*mbc + mx)*(2*mbc + my)*meqn;  /* Store area */
+	
 #if PATCH_DIM == 3
 	int mz = clawpatch_opt->mz;
 	psize *= (2*mbc + mz);
 #endif
 
-	size_t psize = (2*mbc + mx)*(2*mbc + my)*meqn;  /* Store area */
 	return psize*sizeof(double);
 }
 
