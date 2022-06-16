@@ -215,7 +215,7 @@ PROGRAM compare_files
 
   WRITE(6,'(A,F24.8)') 'Time of simulation : t = ',t
 
-  WRITE(fname3,'(A,I0.4)') 'compare_summary',iframe
+  WRITE(fname3,'(A,I0.4)') 'compare_summary.',iframe
   dir3_fname3 = TRIM(dir3)//'/'//TRIM(fname3)
   WRITE(6,*) 'A summary of the results will be stored in : '
   WRITE(6,*) dir3_fname3
