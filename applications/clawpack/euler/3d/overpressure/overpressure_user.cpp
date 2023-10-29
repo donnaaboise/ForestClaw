@@ -155,6 +155,7 @@ void overpressure_link_solvers(fclaw2d_global_t *glob)
             claw46_vt->fort_rpn3   = &CLAWPACK46_RPN3_MAPPED; 
             claw46_vt->fort_rpt3   = &CLAWPACK46_RPT3_MAPPED;
             claw46_vt->fort_rptt3  = &CLAWPACK46_RPTT3_MAPPED;      
+            claw46_vt->src3        = magic_div_tau_src3;
         }
         else
         {

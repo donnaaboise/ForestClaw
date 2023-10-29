@@ -7,6 +7,7 @@ add_library(overpressure_f OBJECT
   fdisc.f90
   user_4.6/bc3_mapped.f90
   user_4.6/qinit.f90
+  magic_div_tau_3d_mapped.f90
   ${rp}/gethexinfo.f90
   ${rp}/rpn3_euler.f90
   ${rp}/rpt3_euler.f90
@@ -22,12 +23,12 @@ add_executable(overpressure
   overpressure.cpp 
   overpressure_options.c 
   overpressure_user.cpp 
+  magic_div_tau.c
   ${all2d}/fclaw2d_map_cart.c 
   ${all2d}/fclaw2d_map_latlong.c 
   ${all2d}/fclaw2d_map_cubedsphere.c 
   ${all2d}/fclaw2d_map_pillowsphere.c 
   overpressure_map_extrude.c
-
   $<TARGET_OBJECTS:overpressure_f>
 )
 

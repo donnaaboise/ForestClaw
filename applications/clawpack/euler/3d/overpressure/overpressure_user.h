@@ -36,6 +36,7 @@
 
 #include "../all/euler3d_user.h"
 
+#include "magic_div_tau.h"
 
 #ifdef __cplusplus
 extern "C"
