@@ -1,20 +1,11 @@
 subroutine magic_div_tau_mapped(blockno, mx,my,mz, mbc, meqn, & 
     maux, dx,dy, dz, dt, xp,yp,zp, xd,yd,zd, & 
-    volumes, xrot,yrot,zrot, faceareas, &
-    aux, q)
+    volumes, xrot,yrot,zrot, faceareas, aux, q)
 
     implicit none
 
     INTEGER mx,my,mz,mbc, meqn, maux, blockno
-    double precision dt
-
-    !! delta on computational grid
-    double precision dx, dy, dz 
-
-    double precision q(1-mbc:mx+mbc, 1-mbc:my+mbc,1-mbc:mz+mbc,meqn)
-
-    !! Stores mu, lambda somewhere
-    double precision aux(1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+1,maux)
+    double precision dx,dy,dz,dt
 
     double precision xp(-mbc:mx+mbc+1,-mbc:my+mbc+1,-mbc:mz+mbc+1)
     double precision yp(-mbc:mx+mbc+1,-mbc:my+mbc+1,-mbc:mz+mbc+1)
@@ -31,6 +22,13 @@ subroutine magic_div_tau_mapped(blockno, mx,my,mz, mbc, meqn, &
     double precision yrot(-mbc:mx+mbc+1,-mbc:my+mbc+1,-mbc:mz+mbc+2,3,3)
     double precision zrot(-mbc:mx+mbc+1,-mbc:my+mbc+1,-mbc:mz+mbc+2,3,3)
 
+    double precision q(1-mbc:mx+mbc, 1-mbc:my+mbc,1-mbc:mz+mbc,meqn)
+
+    !! Stores mu, lambda somewhere
+    double precision aux(1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+1,maux)
+
+
+    !! Local arrays
     double precision g1(3), g2(3), g3(3), g1_up(3), g2_up(3), g3_up(3)
 
     !! Dummy arrays
@@ -50,22 +48,24 @@ subroutine magic_div_tau_mapped(blockno, mx,my,mz, mbc, meqn, &
 
     INTEGER i,j,k, m, dim, ii, jj, kk
     double precision div_tau, divu, lmbda, mu
-    double precision du_xi(3), du_eta(3)    
+    double precision du_xi(3), du_eta(3), rho
+    double precision uavg, vavg, wavg
+
+    logical debug
 
     lmbda = 1
     mu = 1
-
-    write(6,*) 'Calling div_tau'
-
+    debug = .true.
 
     !! Store Cartesian components (u,v) extracted from 
     !! state vectors q. 
     do k = 1-mbc,mz+mbc
         do i = 1-mbc,mx+mbc
             do j = 1-mbc,my+mbc
-                up(i,j,k) = q(i,j,k,2)/q(i,j,k,1)
-                vp(i,j,k) = q(i,j,k,3)/q(i,j,k,1)
-                wp(i,j,k) = q(i,j,k,4)/q(i,j,k,1)
+                rho = q(i,j,k,1)
+                up(i,j,k) = q(i,j,k,2)/rho
+                vp(i,j,k) = q(i,j,k,3)/rho
+                wp(i,j,k) = q(i,j,k,4)/rho
             end do
         end do
     end do
@@ -73,18 +73,27 @@ subroutine magic_div_tau_mapped(blockno, mx,my,mz, mbc, meqn, &
     do k = 0,mz+1
         do i = 0,mx+1
             do j = 0,my+1
-                ud(i,j,k) = (up(i-1,j,k)   + up(i,j,k)   + up(i,j-1,k)   + up(i-1,j-1,k) + & 
-                             up(i-1,j,k-1) + up(i,j,k-1) + up(i,j-1,k-1) + up(i-1,j-1,k-1))/8.
-                vd(i,j,k) = (vp(i-1,j,k)   + vp(i,j,k)   + vp(i,j-1,k)   + vp(i-1,j-1,k) + & 
-                             vp(i-1,j,k-1) + vp(i,j,k-1) + vp(i,j-1,k-1) + vp(i-1,j-1,k-1))/8.
-                wd(i,j,k) = (wp(i-1,j,k)   + wp(i,j,k)   + wp(i,j-1,k)   + wp(i-1,j-1,k) + & 
-                             wp(i-1,j,k-1) + wp(i,j,k-1) + wp(i,j-1,k-1) + wp(i-1,j-1,k-1))/8.
+                uavg = 0
+                vavg = 0
+                wavg = 0
+                do ii = -1,0
+                    do jj = -1,0
+                        do kk = -1,0
+                            uavg = uavg + up(i+ii,j+jj,k+kk)
+                            vavg = vavg + vp(i+ii,j+jj,k+kk)
+                            wavg = wavg + wp(i+ii,j+jj,k+kk)
+                        end do
+                    end do
+                end do
+                ud(i,j,k) = uavg/8.0
+                vd(i,j,k) = vavg/8.0
+                wd(i,j,k) = wavg/8.0
             end do
         end do
     end do
 
 
-    !! Step 1 : Compute grad v at x-faces
+    !! Step 1 : Compute grad v at each face
 
     do dim = 1,3
         do k = 1,mz+1
@@ -103,6 +112,8 @@ subroutine magic_div_tau_mapped(blockno, mx,my,mz, mbc, meqn, &
                     !! We need to include the harmonic average to get the correct
                     !! corvariant vectors in the non-tangent vectors. 
                     call magic_hex_compute_vectors(hex,g1,g2,g3, g1_up, g2_up, g3_up)
+
+                    write(6,100) dim, (g1(ii),ii = 1,3)
 
                     !! Compute covariant vectors
                     if (dim == 1) then 
@@ -127,7 +138,7 @@ subroutine magic_div_tau_mapped(blockno, mx,my,mz, mbc, meqn, &
 
                         do ii = 1,3
                             nvec(ii) = xrot(i,j,k,1,ii)
-                        end do
+                        end do                        
 
                     elseif (dim == 2) then
                         !! y-face (bottom)
@@ -181,6 +192,13 @@ subroutine magic_div_tau_mapped(blockno, mx,my,mz, mbc, meqn, &
                     !! Compute (grad x) n
                     !! ------------------------
 
+                    do ii = 1,3
+                        !!write(6,200) g1_up(ii), g2_up(ii), g3_up(ii)
+                    end do
+                    !!write(6,*) ' '
+                    !!write(6,200) dim, (nvec(ii), ii=1,3)
+200 format(I5,3F16.8)                    
+
                     !! g1_up dot n
                     gxn(1) = g1_up(1)*nvec(1) + g1_up(2)*nvec(2) + g1_up(3)*nvec(3)
 
@@ -212,22 +230,27 @@ subroutine magic_div_tau_mapped(blockno, mx,my,mz, mbc, meqn, &
                     !! -----------------------------------------------------
 
                     divu = (dUdx(1)*g1_up(1) + dUdx(2)*g1_up(2) + dUdx(3)*g1_up(3)) + & 
-                        (dUdy(1)*g2_up(1) + dUdy(2)*g2_up(2) + dUdy(3)*g2_up(3)) + &
-                        (dUdz(1)*g3_up(1) + dUdz(2)*g3_up(3) + dUdz(3)*g3_up(3))
+                           (dUdy(1)*g2_up(1) + dUdy(2)*g2_up(2) + dUdy(3)*g2_up(3)) + &
+                           (dUdz(1)*g3_up(1) + dUdz(2)*g3_up(2) + dUdz(3)*g3_up(3))
 
                     do ii = 1,3
                         tau_n(i,j,k,dim,ii) = mu*(gradxn(ii) + gradxTn(ii)) + & 
                             lmbda*divu*nvec(ii)
                     enddo
+                    if (debug) then
+                        !!write(6,100) dim, (tau_n(i,j,k,dim,ii), ii=1,3)
+                    endif
                 end do
             end do
         end do
     end do
+    stop    
+100   format(I5,3E12.4)
+
 
     do k = 1,mz
         do i = 1,mx
             do j = 1,my
-
                 do ii = 1,3
                     div_tau = faceareas(i+1,j,k,1) *tau_n(i+1,j,k,1,ii) -  &
                           faceareas(i,j,k,1)   *tau_n(i,j,k,1,ii) + &                          
@@ -296,6 +319,7 @@ subroutine magic_hex_compute_vectors(hex,g1,g2,g3,g1_up, g2_up, g3_up)
     double precision hex(0:1,0:1,0:1,3)
     double precision g1(3), g2(3), g3(3), g1_up(3), g2_up(3), g3_up(3)
 
+    !! Local arrays
     double precision Jb(3,3), Jinv(3,3), xcv(3), ycv(3), zcv(3)
 
     double precision z000(3),z100(3),z010(3),z001(3), z110(3), & 
@@ -306,19 +330,6 @@ subroutine magic_hex_compute_vectors(hex,g1,g2,g3,g1_up, g2_up, g3_up)
 
     logical is_id
     integer i,j,k, n, ni, info
-    double precision rhs(3,3)
-
-
-!!    do i = 1,3
-!!        do j = 1,3
-!!            if (i == j) then
-!!                eye(i,j) = 1.d0
-!!            else
-!!                eye(i,j) = 0.d0
-!!            endif
-!!        end do
-!!    end do
-
 
     !! Get centers of faces so we can find basis vectors at each face.
     do i = 1,3
@@ -382,15 +393,15 @@ subroutine magic_hex_compute_vectors(hex,g1,g2,g3,g1_up, g2_up, g3_up)
 
         !! # Compute inverse of Jacobian.
         !!  call dgesv(3,3,Jb,3,IPIV,rhs,3,info)
-        call magic_hex_compute_Jinv(Jb,rhs,info)
+        call magic_hex_compute_Jinv(Jb,Jinv,info)
 
         do i = 1,3
             if (n .eq. 1) then
-                g1_up(i) = rhs(1,1)*g1(i) + rhs(1,2)*g2(i) + rhs(1,3)*g3(i)
+                g1_up(i) = Jinv(1,1)*g1(i) + Jinv(1,2)*g2(i) + Jinv(1,3)*g3(i)
             else if (n .eq. 2) then
-                g2_up(i) = rhs(2,1)*g1(i) + rhs(2,2)*g2(i) + rhs(2,3)*g3(i)
+                g2_up(i) = Jinv(2,1)*g1(i) + Jinv(2,2)*g2(i) + Jinv(2,3)*g3(i)
             else if (n .eq. 3) then
-                g3_up(i) = rhs(3,1)*g1(i) + rhs(3,2)*g2(i) + rhs(3,3)*g3(i)
+                g3_up(i) = Jinv(3,1)*g1(i) + Jinv(3,2)*g2(i) + Jinv(3,3)*g3(i)
             endif 
         end do
     end do
