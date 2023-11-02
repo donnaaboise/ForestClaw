@@ -175,11 +175,80 @@ void phasefield::applySinglePatch(const PatchInfo<2>& pinfo,
 
         In the anisotropic case, we have to compute T inside the loop.
     */
-    double  T = xi*xi;
+
+
+    // Compute anisotropic eta(theta)
+
 
     /* Get local view into phi_n : component 1 */
     ComponentView<const double,2> pn = phi_n.getComponentView(1, pinfo.local_index);
 
+    //ComponentArray(const std::array<int, D>& lengths, int num_ghost_cells)
+    //PatchArray<2> fluxes(sizes, 2, 2);
+
+    //int sizes[2] = {mx,my};
+    const std::array<int,2> sizes = {mx,my};
+    ComponentArray<2> fluxes_x(sizes,2);   // PatchArray
+    ComponentArray<2> fluxes_y(sizes,2);
+
+    ComponentArray<2> phi_nodes(sizes,2);
+    if (phase_opt->anisotropic)
+    {
+        // Average phi onto nodes
+        for(int j = 0; j < my+1; j++)
+            for(int i = 0; i < mx+1; i++)
+                phi_nodes(i,j) = (phi(i,j) + phi(i-1,j) + phi(i-1,j-1) + phi(i,j-1))/4.0;
+    }
+
+    // Compute flux = T grad phi at x-faces and y-faces
+    // fluxes at x-faces
+    double gamma = phase_opt->gamma;
+    double kaniso = phase_opt->k;
+    for(int j = 0; j < my; j++)
+        for(int i = 0; i < mx+1; i++)
+        {
+            double phix = (phi(i,j) - phi(i-1,j))/dx;
+            if (phase_opt->anisotropic)
+            {
+                double phiy = (phi_nodes(i,j+1) - phi_nodes(i,j))/dy;
+                double theta = atan2(phiy,phix);
+                double eta = (1 + gamma*cos(kaniso*theta));
+                double etap = -gamma*kaniso*sin(kaniso*theta);
+                double T11 = eta*eta;
+                double T12 = -eta*etap;
+
+                // We only need the component in direction (1,0)
+                fluxes_x(i,j) = T11*phix + T12*phiy;
+            }
+            else
+            {
+                fluxes_x(i,j) = phix;
+            }
+        }
+
+    for(int j = 0; j < my+1; j++)
+        for(int i = 0; i < mx; i++)
+        {
+            double phiy = (phi(i,j) - phi(i,j-1))/dy;
+            if (phase_opt->anisotropic)
+            {
+                double phix = (phi_nodes(i+1,j) - phi_nodes(i,j))/dx;
+                double theta = atan2(phiy,phix);
+                double eta = (1 + gamma*cos(kaniso*theta));
+                double etap = -gamma*kaniso*sin(kaniso*theta);
+                double T21 = eta*etap;
+                double T22 = eta*eta;
+
+                // We only need the component in direction (0,1)
+                fluxes_y(i,j) = T21*phix + T22*phiy;
+            }
+            else
+            {
+                fluxes_y(i,j) = phiy;
+            }
+        }
+
+    // Compute the divergence
     for(int j = 0; j < my; j++)
         for(int i = 0; i < mx; i++)
         {
@@ -188,8 +257,9 @@ void phasefield::applySinglePatch(const PatchInfo<2>& pinfo,
                            (u(i,j+1) - 2*uij + u(i,j-1))/dy2;
 
             double phi_ij = phi(i,j);
-            double lap_phi = (phi(i+1,j) - 2*phi_ij + phi(i-1,j))/dx2 + 
-                             (phi(i,j+1) - 2*phi_ij + phi(i,j-1))/dy2;
+
+            double div_T_grad_phi = (fluxes_x(i+1,j) - fluxes_x(i,j))/dx + 
+                      (fluxes_y(i,j+1) - fluxes_y(i,j))/dy;
 
             /* Use phi_n from previous time step */
             double pn_ij = pn(i,j);
@@ -200,7 +270,7 @@ void phasefield::applySinglePatch(const PatchInfo<2>& pinfo,
 
             Au(i,j)   = lap_u + lambda*(uij + S1*phi_ij);
             //f_phi(i,j) = T*lap_phi + lambda*(1/lambda*S2*uij + beta*phi_ij);
-            Aphi(i,j) = T*lap_phi + S2*uij + lambda*beta*phi_ij;
+            Aphi(i,j) = xi*xi*div_T_grad_phi + S2*uij + lambda*beta*phi_ij;
         }
     
 #else

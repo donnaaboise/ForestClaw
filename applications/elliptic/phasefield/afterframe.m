@@ -29,10 +29,10 @@ axis square;
 colorbar;
 
 if (mq == 1)
-    caxis([-1.1,0]);
+    clim([-1.1,0]);
     % caxis([-1,-0.99])
 elseif (mq == 2)
-    caxis([0,1]);
+    clim([0,1]);
     drawcontourlines([0.5,0.5]);
 end
 colormap(parula);
@@ -100,7 +100,7 @@ end
 %}
 
 if (Frame <= 32)
-    plot_fishpack = true;
+    plot_fishpack = false;
 else
     plot_fishpack = false;
 end
@@ -158,7 +158,7 @@ set(gca,'fontsize',16);
 % to create movie dendrite.gif.
 NoQuery = 0;
 MaxFrames = 64;
-prt = true;
+prt = false;
 if (prt)
     if (length(amrdata) == 1)
         prefix = 'single';

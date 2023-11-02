@@ -60,6 +60,8 @@ typedef struct phasefield_options
     double k; 
     double gamma; 
     double r0; 
+    int anisotropic;
+
 
     double x0;
     double y0;
