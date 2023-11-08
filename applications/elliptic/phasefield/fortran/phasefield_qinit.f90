@@ -16,7 +16,7 @@ subroutine phasefield_init(meqn,mbc,mx,my, &
             ylow = ylower + (j-1)*dy
 
             call cellave(xlow,ylow,dx,dy,w)
-            q(i,j,1) = w-1.d0
+            q(i,j,1) = w-1
             q(i,j,2) = 1-w
         enddo
     enddo
