@@ -27,6 +27,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw2d_clawpatch_pillow.h>
 
+#include <fc2d_clawpack46.h> 
+#include <fc2d_clawpack46_fort.h>
+#include <clawpack46_user_fort.h>
+
+#include <fc2d_clawpack5.h>  
+#include <fc2d_clawpack5_fort.h>
+#include <clawpack5_user_fort.h>
+
+
 static
 void sphere_problem_setup(fclaw2d_global_t* glob)
 {
@@ -39,6 +48,8 @@ void sphere_problem_setup(fclaw2d_global_t* glob)
         fprintf(f,  "%-24.16f   %s",user->gravity,"\% gravity\n");
         fprintf(f,  "%-24d   %s",user->mapping,"\% mapping\n");
         fprintf(f,  "%-24d   %s",user->init_cond,"\% initial_condition\n");
+        fprintf(f,  "%-24.16f   %s",user->hmax,"\% hmax\n");
+        fprintf(f,  "%-24.16f   %s",user->amp,"\% amp\n");
         fprintf(f,  "%-24.16f   %s",user->omega[0],"\% omega[0]\n");
         fprintf(f,  "%-24.16f   %s",user->omega[1],"\% omega[1]\n");
         fprintf(f,  "%-24.16f   %s",user->omega[2],"\% omega[2]\n");

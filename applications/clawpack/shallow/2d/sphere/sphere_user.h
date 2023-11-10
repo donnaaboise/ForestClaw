@@ -32,22 +32,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw2d_clawpatch_options.h>
 
 
-/* Clawpack 4.6 headers */
-#include <fc2d_clawpack46.h>  
-#include <fc2d_clawpack46_options.h>
-#include <fc2d_clawpack46_fort.h>  
-#include <clawpack46_user_fort.h>  
-#include <fclaw2d_clawpatch46_fort.h>
-
-
-/* Clawpack 5.0 headers */
-#include <fc2d_clawpack5.h>
-#include <fc2d_clawpack5_options.h>
-#include <fc2d_clawpack5_fort.h>
-#include <clawpack5_user_fort.h>
-#include <fclaw2d_clawpatch5_fort.h>
-
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -64,6 +48,10 @@ typedef struct user_options
     int mapping;
 
     int init_cond;
+    
+    // Gaussian
+    double hmax;
+    double amp;
 
     const char* omega_string;
     double *omega;
