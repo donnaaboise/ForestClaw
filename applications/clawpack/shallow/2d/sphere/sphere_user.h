@@ -98,22 +98,16 @@ void SPHERE_SETAUX(const int* mx, const int* my,const int* mbc,
                    double surnormals[],double edgelengths[],
                    double aux[],int* maux);
 
+
+#define RPN2CONS_UPDATE FCLAW_F77_FUNC(rpn2cons_update, \
+                                       RPN2CONS_UPDATE)
+
+void RPN2CONS_UPDATE(const int* meqn, const int* maux, 
+                     const int* idir, const int* iface,
+                     double q[], double aux_center[], 
+                     double aux_edge[], double flux[]);
+
 void sphere_link_solvers(fclaw2d_global_t *glob);
-
-
-#if 0
-fclaw2d_map_context_t *
-    fclaw2d_map_new_latlong (fclaw2d_map_context_t* brick,
-                             const double scale[],
-                             const double lat[],
-                             const double longitude[],
-                             const int a, const int b);
-
-fclaw2d_map_context_t * fclaw2d_map_new_cubedsphere (const double scale[],
-                                                     const double shift[],
-                                                     const double rotate[]);
-#endif
-
 
 
 #ifdef __cplusplus
