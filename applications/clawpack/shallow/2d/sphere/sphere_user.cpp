@@ -53,8 +53,6 @@ void sphere_problem_setup(fclaw2d_global_t* glob)
         fprintf(f,  "%-24.16f   %s",user->hin,"\% hin\n");
         fprintf(f,  "%-24.16f   %s",user->hout,"\% hout\n");
 
-        fprintf(f,  "%-24.16f   %s",user->disk_diameter,"\% disk_diameter\n");
-
         fprintf(f,  "%-24.16f   %s",user->ring_inner,"\% ring-inner\n");
         fprintf(f,  "%-24.16f   %s",user->ring_outer,"\% ring-outer\n");
 
@@ -100,7 +98,8 @@ void sphere_patch_setup_manifold(fclaw2d_global_t *glob,
 
     SPHERE_SETAUX(&mx,&my,&mbc,&xlower,&ylower,
                   &dx,&dy,area,xnormals,ynormals,
-                  xtangents,ytangents,surfnormals, edgelengths,
+                  xtangents,ytangents,surfnormals, curvature,
+                  edgelengths,
                   aux, &maux);
 
     // fc2d_clawpack46_set_capacity(domain,this_patch,this_block_idx,this_patch_idx);
