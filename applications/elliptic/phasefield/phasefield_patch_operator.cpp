@@ -14,18 +14,21 @@ double phasefield::getLambda(){
 phasefield::phasefield(fclaw2d_global_t *glob,
                        const Vector<2>& phi_n,
                        const Domain<2>& domain,
-                       const GhostFiller<2>& ghost_filler) 
-    : phasefield(fc2d_thunderegg_get_options(glob),phasefield_get_options(glob),phi_n,domain,ghost_filler) 
+                       const GhostFiller<2>& ghost_filler,
+                       int is_anisotropic) 
+    : phasefield(fc2d_thunderegg_get_options(glob),phasefield_get_options(glob),phi_n,domain,ghost_filler,is_anisotropic) 
 {
     //this just calls the other constructor
 }
 phasefield::phasefield(const fc2d_thunderegg_options *mg_opt,const phasefield_options* phase_opt,
                        const Vector<2>& phi_n_in,
                        const Domain<2>& domain,
-                       const GhostFiller<2>& ghost_filler) 
+                       const GhostFiller<2>& ghost_filler,
+                       int is_anisotropic) 
     : PatchOperator<2>(domain,ghost_filler),
       phi_n(phi_n_in),
-      phase_opt(phase_opt)
+      phase_opt(phase_opt),
+      anisotropic(is_anisotropic)
 
 {
     /* User should call 'fc2d_thunderegg_phasefield_set_lambda' before calling elliptic solve */
@@ -44,6 +47,8 @@ phasefield::phasefield(const fc2d_thunderegg_options *mg_opt,const phasefield_op
 phasefield* phasefield::clone() const{
     return new phasefield(*this);
 }
+
+// This is needed is if this operator is being used as a smoother.
 void phasefield::applySinglePatchWithInternalBoundaryConditions(const PatchInfo<2>& pinfo, 
                                                                 const PatchView<const double,2>& us,
                                                                 const PatchView<double,2>& fs) const 
@@ -85,6 +90,7 @@ void phasefield::applySinglePatchWithInternalBoundaryConditions(const PatchInfo<
     }
     applySinglePatch(pinfo,us,fs);
 }
+
 void phasefield::applySinglePatch(const PatchInfo<2>& pinfo, 
                                   const PatchView<const double,2>& us,
                                   const PatchView<double,2>& fs) const 

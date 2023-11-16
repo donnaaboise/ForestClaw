@@ -7,6 +7,8 @@ class phasefield : public ThunderEgg::PatchOperator<2>
     private:
     static double lambda;
 
+    int anisotropic;
+
     public:
     ThunderEgg::Vector<2> phi_n;
 
@@ -15,12 +17,15 @@ class phasefield : public ThunderEgg::PatchOperator<2>
     phasefield(fclaw2d_global_t *glob,
                const ThunderEgg::Vector<2>& phi_n_in,
                const ThunderEgg::Domain<2>& domain,
-               const ThunderEgg::GhostFiller<2>& ghost_filler);
+               const ThunderEgg::GhostFiller<2>& ghost_filler,
+               int is_anisotropic);
 
+    // Get rid of this one? 
     phasefield(const fc2d_thunderegg_options *mg_opt,const phasefield_options* phase_opt,
                const ThunderEgg::Vector<2>& phi_n_in,
                const ThunderEgg::Domain<2>& domain,
-               const ThunderEgg::GhostFiller<2>& ghost_filler);
+               const ThunderEgg::GhostFiller<2>& ghost_filler,
+               int is_anisotropic);
 
     phasefield* clone() const override;
 

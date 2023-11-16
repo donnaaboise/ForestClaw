@@ -78,6 +78,8 @@ void phasefield_solve(fclaw2d_global_t *glob)
     const fclaw_options_t *fclaw_opt = fclaw2d_get_options(glob);
     const fc2d_thunderegg_options_t *mg_opt = fc2d_thunderegg_get_options(glob);
     const fclaw2d_clawpatch_options_t *clawpatch_opt = fclaw2d_clawpatch_get_options(glob);
+
+    const phasefield_options_t *phase_opt = phasefield_get_options(glob);
   
     GhostFillingType fill_type = GhostFillingType::Faces;
 #if 0  
@@ -117,7 +119,8 @@ void phasefield_solve(fclaw2d_global_t *glob)
     BiLinearGhostFiller ghost_filler(te_domain, fill_type);
 
     // patch operator
-    phasefield op(glob,beta_vec,te_domain,ghost_filler);
+    int anisotropic = phase_opt->anisotropic;
+    phasefield op(glob,beta_vec,te_domain,ghost_filler,anisotropic);
 
     // set the patch solver
     Iterative::CG<2> patch_cg;
@@ -141,7 +144,10 @@ void phasefield_solve(fclaw2d_global_t *glob)
             exit(0);            
     }
 
-    Iterative::PatchSolver<2> solver(*patch_iterative_solver,op,true);
+    // Create new operator here
+    anisotropic = 0;
+    phasefield op_smooth(glob,beta_vec,te_domain,ghost_filler,anisotropic);
+    Iterative::PatchSolver<2> solver(*patch_iterative_solver,op_smooth,true);
 
     // create gmg preconditioner
     shared_ptr<Operator<2>> M;
@@ -169,7 +175,7 @@ void phasefield_solve(fclaw2d_global_t *glob)
         GMG::LinearRestrictor<2> restrictor(curr_domain, 
                                             next_domain); 
 
-        builder.addFinestLevel(op, solver, restrictor);
+        builder.addFinestLevel(op_smooth, solver, restrictor);
 
         //add intermediate levels
         auto prev_phi_n_vec = beta_vec;
@@ -183,8 +189,10 @@ void phasefield_solve(fclaw2d_global_t *glob)
             BiLinearGhostFiller ghost_filler(curr_domain, fill_type);
             Vector<2> restricted_phi_n_vec = restrict_phi_n_vec(prev_phi_n_vec, 
                                                                 prev_domain, curr_domain);
+
+            anisotropic = 0;
             phasefield patch_operator(glob,restricted_phi_n_vec,curr_domain, 
-                                      ghost_filler);
+                                      ghost_filler,anisotropic);
             prev_phi_n_vec = restricted_phi_n_vec;
 
             //smoother
@@ -211,8 +219,10 @@ void phasefield_solve(fclaw2d_global_t *glob)
         BiLinearGhostFiller ghost_filler(curr_domain, fill_type);
         Vector<2> restricted_phi_n_vec = restrict_phi_n_vec(prev_phi_n_vec, 
                                                             prev_domain, curr_domain);
+
+        anisotropic = 0;
         phasefield coarse_patch_operator(glob,restricted_phi_n_vec, curr_domain, 
-                                         ghost_filler);
+                                         ghost_filler,anisotropic);
 
         //smoother
         Iterative::PatchSolver<2> smoother(*patch_iterative_solver, coarse_patch_operator, true);
@@ -236,6 +246,7 @@ void phasefield_solve(fclaw2d_global_t *glob)
     iter_solver.setMaxIterations(mg_opt->max_it);
     iter_solver.setTolerance(mg_opt->tol);    
     bool prt_output = glob->mpirank == 0;
+    prt_output=0;
     int its = iter_solver.solve(op, u, f, M.get(), prt_output);
 
     fclaw_global_productionf("Iterations: %i\n", its);    
