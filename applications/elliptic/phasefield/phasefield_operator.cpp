@@ -234,7 +234,7 @@ void phasefield_solve(fclaw2d_global_t *glob)
         M = builder.getCycle();
     }
 
-#if 0
+#if 1
     // Set starting conditions
     Vector<2> u = fc2d_thunderegg_get_vector(glob,SOLN);
 #else

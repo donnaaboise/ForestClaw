@@ -40,7 +40,8 @@ double precision function fdisc(x,y)
 
     r = sqrt((x-x0)**2 + (y-y0)**2)
     theta = atan2(y - y0,x - x0)
-    rp = r0*(1.d0 + gamma*cos(k*theta))
+    !!rp = r0*(1.d0 + gamma*cos(k*theta))
+    rp = r0
     fdisc = r - rp
 
 end function fdisc

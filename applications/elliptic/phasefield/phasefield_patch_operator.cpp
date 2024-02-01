@@ -264,12 +264,13 @@ void phasefield::applySinglePatch(const PatchInfo<2>& pinfo,
 
             double phi_ij = phi(i,j);
 
-#if 0
+#if 1
             double div_T_grad_phi = (fluxes_x(i+1,j) - fluxes_x(i,j))/dx + 
                       (fluxes_y(i,j+1) - fluxes_y(i,j))/dy;
-#endif
+#else
             double div_T_grad_phi = (phi(i+1,j) - 2*phi_ij + phi(i-1,j))/dx2 + 
                            (phi(i,j+1) - 2*phi_ij + phi(i,j-1))/dy2;
+#endif                           
 
             /* Use phi_n from previous time step */
             double pn_ij = pn(i,j);

@@ -37,7 +37,7 @@ elseif (mq == 2)
 end
 colormap(parula);
 
-%%{
+%% {
 if (mq == 1)
     cv = linspace(0,1,11);
     cv([1 end]) = [];
@@ -69,7 +69,7 @@ if (mq == 1)
             [~,h_phi(k)] = contour(xcm,ycm,phi,[0.5 0.5],'k','linewidth',2);
             hold on;
             % Plot the transpose to check for symmetry.
-            contour(ycm,xcm,phi,[0.5 0.5],'r','linewidth',2);
+           % contour(ycm,xcm,phi,[0.5 0.5],'r','linewidth',2);
             % [~,h_phi(2)] = contour(xcm,ycm,phi,[tau/2, 1-tau/2],'k');
         end
         % m = ishandle(h_phi);
@@ -163,7 +163,7 @@ if (prt)
     if (length(amrdata) == 1)
         prefix = 'single';
     else
-        prefix = 'amr10';
+        prefix = 'amr12';
     end
     % hidepatchborders;
     title(sprintf('Thermal and phase fields (t = %.3f)',t),'fontsize',18);
