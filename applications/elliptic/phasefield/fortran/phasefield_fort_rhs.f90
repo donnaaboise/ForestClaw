@@ -12,14 +12,15 @@ subroutine phasefield_fort_rhs(blockno, mbc,mx,my,meqn,mfields, &
 
     INTEGER :: i,j, blockno
     DOUBLE PRECISION :: lambda, u, phi, g0, g, s1, s3, beta
-    double precision :: N_noise
+    double precision :: N_noise, r
 
     lambda = -1.d0/dt
     beta = xi**2/m_parm;
 
     do j = 1,my
         do i = 1,mx
-            call random_number(N_noise)
+            call random_number(r)
+            N_noise = -1 * 2*r
             u = q(i,j,1)
             phi = q(i,j,2)
 
