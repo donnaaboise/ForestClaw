@@ -20,7 +20,8 @@ subroutine phasefield_fort_rhs(blockno, mbc,mx,my,meqn,mfields, &
     do j = 1,my
         do i = 1,mx
             call random_number(r)
-            N_noise = -1 * 2*r
+            N_noise = -1 + 2*r
+            write(6,*) N_noise
             u = q(i,j,1)
             phi = q(i,j,2)
 
@@ -34,6 +35,7 @@ subroutine phasefield_fort_rhs(blockno, mbc,mx,my,meqn,mfields, &
             rhs(i,j,2) = lambda*beta*phi - s3
         end do
     end do
+    stop
 
 end subroutine phasefield_fort_rhs
 
