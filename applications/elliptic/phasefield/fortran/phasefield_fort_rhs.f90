@@ -7,17 +7,19 @@ subroutine phasefield_fort_rhs(blockno, mbc,mx,my,meqn,mfields, &
     DOUBLE PRECISION rhs(1-mbc:mx+mbc,1-mbc:my+mbc,mfields)    
     DOUBLE PRECISION q(1-mbc:mx+mbc,1-mbc:my+mbc,meqn)
 
-    DOUBLE PRECISION S, alpha, m_parm, xi, k, gamma
-    COMMON /comm_parms/ S, alpha, m_parm, xi, k, gamma
+    DOUBLE PRECISION S, alpha, m_parm, xi, k, gamma, An
+    COMMON /comm_parms/ S, alpha, m_parm, xi, k, gamma, An
 
-    INTEGER i,j, blockno
-    DOUBLE PRECISION lambda, u, phi, g0, g, s1, s3, beta
+    INTEGER :: i,j, blockno
+    DOUBLE PRECISION :: lambda, u, phi, g0, g, s1, s3, beta
+    double precision :: N_noise
 
     lambda = -1.d0/dt
     beta = xi**2/m_parm;
 
     do j = 1,my
         do i = 1,mx
+            call random_number(N_noise)
             u = q(i,j,1)
             phi = q(i,j,2)
 
@@ -25,7 +27,7 @@ subroutine phasefield_fort_rhs(blockno, mbc,mx,my,meqn,mfields, &
             g = g0**2
 
             s1 = 30*g/S
-            s3 = g0*(phi-0.5d0)
+            s3 = g0*(phi-0.5d0*(1 + An*N_noise))
 
             rhs(i,j,1) = lambda*(u + s1*phi)
             rhs(i,j,2) = lambda*beta*phi - s3

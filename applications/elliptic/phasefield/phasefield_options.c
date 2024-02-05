@@ -74,6 +74,10 @@ phasefield_register (phasefield_options_t *user, sc_options_t * opt)
     sc_options_add_double (opt, 0, "y0", &user->y0, 0,
                            "y-location of initial seed [0]");
 
+
+    sc_options_add_double (opt, 0, "An", &user->An, 0,
+                           "Amplitude of noise [0]");
+
     user->is_registered = 1;
 
     return NULL;

@@ -67,6 +67,7 @@ void phasefield_problem_setup(fclaw2d_global_t *glob)
         fprintf(f,  "%-24.6f   %s",user->x0,         "% x0\n");
         fprintf(f,  "%-24.6f   %s",user->y0,         "% y0\n");
 
+        fprintf(f,  "%-24.6f   %s",user->An,         "% An\n");
 #if 0
         const fclaw_options_t *fclaw_opt = fclaw2d_get_options(glob);
         double xlower = fclaw_opt->ax;

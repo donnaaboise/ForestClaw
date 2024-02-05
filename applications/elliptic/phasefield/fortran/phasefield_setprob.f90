@@ -4,8 +4,8 @@ SUBROUTINE phasefield_setprob()
     INTEGER example
     COMMON /comm_example/ example
 
-    DOUBLE PRECISION S, alpha, m, xi, k, gamma
-    COMMON /comm_parms/ S, alpha, m, xi, k, gamma
+    DOUBLE PRECISION S, alpha, m, xi, k, gamma, An
+    COMMON /comm_parms/ S, alpha, m, xi, k, gamma, An
 
     DOUBLE PRECISION r0, x0, y0
     COMMON /comm_init/ r0, x0, y0
@@ -30,6 +30,7 @@ SUBROUTINE phasefield_setprob()
     read(10,*) r0
     read(10,*) x0
     read(10,*) y0
+    read(10,*) An
 
     read(10,*) bc_type(0)
     read(10,*) bc_type(1)

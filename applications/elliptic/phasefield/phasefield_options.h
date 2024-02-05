@@ -66,6 +66,8 @@ typedef struct phasefield_options
     double x0;
     double y0;
 
+    double An;
+
     int is_registered;
 
 } phasefield_options_t;
