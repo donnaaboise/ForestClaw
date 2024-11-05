@@ -71,6 +71,8 @@ typedef enum
     FCLAW_PATCH_DATA_CONSIDERED_FOR_REFINEMENT = 0x1,
     /** Patch has coarse data and it's family needs to be refined */
     FCLAW_PATCH_DATA_HAS_COARSE_DATA = 0x2,
+    /** Patch is currently being unpacked during partitioning */
+    FCLAW_PATCH_DATA_UNPACKING = 0x4,
 
 } fclaw_patch_data_flags_t;
 

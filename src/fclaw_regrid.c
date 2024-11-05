@@ -253,7 +253,8 @@ void cb_refine_after_partition(fclaw_domain_t *domain,
                                          blockno,-1,patchno,igrid);
         
             fclaw_patch_data_delete(g->glob,domain, &artificial_patch);
-        
+
+            fclaw_patch_considered_for_refinement_set(g->glob, patch);
         }
 
         fclaw_patch_has_coarse_data_clear(g->glob, patch);
