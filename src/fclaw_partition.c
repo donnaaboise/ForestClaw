@@ -56,11 +56,6 @@ void patch_unpack_cb(fclaw_domain_t * domain,
     fclaw_patch_partition_unpack(glob,domain,patch,
                                  blockno,patchno,
                                  unpack_data_from_here);
-    /* Reason for the following two lines: the glob contains the old domain 
-    which is incremented in ddata_old  but we really want to increment the 
-    new domain. */
-    --glob->domain->count_set_patch;
-    ++domain->count_set_patch; 
 }
 
 static
@@ -94,6 +89,7 @@ void  cb_transfer(fclaw_domain_t * old_domain,
                             int old_patchno, int new_patchno,
                             void *user)
 {
+    fclaw_global_t *glob = (fclaw_global_t *) user;
     FCLAW_ASSERT(old_patch->xlower == new_patch->xlower);
     FCLAW_ASSERT(old_patch->ylower == new_patch->ylower);
     FCLAW_ASSERT(old_patch->zlower == new_patch->zlower);
@@ -101,10 +97,8 @@ void  cb_transfer(fclaw_domain_t * old_domain,
     FCLAW_ASSERT(old_patch->yupper == new_patch->yupper);
     FCLAW_ASSERT(old_patch->zupper == new_patch->zupper);
 
-    new_patch->user = old_patch->user;
-    old_patch->user = NULL;
-    ++old_domain->count_delete_patch;
-    ++new_domain->count_set_patch;
+    fclaw_patch_shallow_copy(glob,old_domain,old_patch,new_domain,new_patch,
+                             blockno,old_patchno,new_patchno);
 }
 
 static
@@ -123,7 +117,7 @@ void  cb_transfer_and_unpack(fclaw_domain_t * old_domain,
     if (old_patch != NULL)
     {
         cb_transfer(old_domain,old_patch,new_domain,new_patch,
-                    blockno,old_patchno,new_patchno,NULL);
+                    blockno,old_patchno,new_patchno,g->glob);
     }
     else
     {
@@ -139,14 +133,6 @@ void  cb_transfer_and_unpack(fclaw_domain_t * old_domain,
         and the both domains are needed to increment/decrement patches */
         fclaw_patch_partition_unpack(g->glob,new_domain,new_patch,
                                        blockno,new_patchno,unpack_data_from_here);
-
-        /* Reason for the following two lines: the glob contains the old domain 
-        which is incremented in ddata_old  but we really want to increment the 
-        new domain. */
-        --old_domain->count_set_patch;
-        ++new_domain->count_set_patch;
-
-
     }
 }
 
@@ -256,7 +242,7 @@ void partition_domain(fclaw_global_t* glob,
     
         fclaw_domain_iterate_transfer(*domain, new_domain,
                                       cb_transfer,
-                                      NULL);
+                                      glob);
 
         fclaw_domain_iterate_unpack(new_domain, p, patch_unpack_cb, (void *) glob);
         fclaw_domain_partition_free(p);

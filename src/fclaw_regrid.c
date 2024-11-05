@@ -280,10 +280,8 @@ void cb_fclaw_regrid_repopulate(fclaw_domain_t * old_domain,
     {
         FCLAW_ASSERT(0 <= blockno && blockno < new_domain->num_blocks);
         FCLAW_ASSERT(0 <= new_patchno && new_patchno < new_domain->local_num_patches);
-        new_patch->user = old_patch->user;
-        old_patch->user = NULL;
-        ++old_domain->count_delete_patch;
-        ++new_domain->count_set_patch;
+        fclaw_patch_shallow_copy(g->glob, old_domain, old_patch, new_domain, new_patch,
+                                 blockno, old_patchno, new_patchno);
     }
     else if (newsize == FCLAW_PATCH_HALFSIZE)
     {

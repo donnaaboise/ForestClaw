@@ -110,6 +110,8 @@ struct fclaw_patch_data
 
     /** Boolean flags */
     int flags;
+    /** Number of fclaw_patch_t objects that have this patch set as patch->user */
+    int num_owners;
 
     /** User defined patch structure */
     void *user_patch;
@@ -265,6 +267,26 @@ void fclaw_patch_build_from_fine(struct fclaw_global *glob,
                                  int fine0_patchno,
                                  fclaw_build_mode_t build_mode);
 
+/**
+ * @brief Create a shallow copy of a patch
+ * 
+ * @param[in] glob the global context
+ * @param[in] src_domain the source domain
+ * @param[in] src_patch the source patch 
+ * @param[in] dst_domain the destination domain
+ * @param[in,out] dst_patch the destination patch
+ * @param[in] blockno the block number
+ * @param[in] src_patchno the source patch number
+ * @param[in] dst_patchno the destination patch number
+ */
+void fclaw_patch_shallow_copy(struct fclaw_global *glob,
+                              struct fclaw_domain *src_domain,
+                              struct fclaw_patch *src_patch,
+                              struct fclaw_domain *dst_domain,
+                              struct fclaw_patch *dst_patch,
+							  int blockno,
+							  int old_patchno,
+							  int new_patchno);
 
 ///@}
 /* ------------------------------------------------------------------------------------ */

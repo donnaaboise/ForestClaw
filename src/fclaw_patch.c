@@ -88,9 +88,10 @@ void patch_data_new(fclaw_global_t* glob,
 	FCLAW_ASSERT(patch_vt->patch_new != NULL);
 	pdata->user_patch = patch_vt->patch_new();
 
-	++domain->count_set_patch; //this is now in cb_fclaw2d_regrid_repopulate 
+	++domain->count_set_patch;
 	pdata->neighbors_set = 0;
 	pdata->flags = 0;
+	pdata->num_owners = 1;
 }
 
 static 
@@ -147,15 +148,23 @@ void fclaw_patch_data_delete(fclaw_global_t *glob,
 
     if (pdata != NULL)
     {
-        if (patch_vt->destroy_user_data)
-        {
-            patch_vt->destroy_user_data(glob,this_patch);
-        }
+		if(pdata->num_owners > 1)
+		{
+			--pdata->num_owners;
+		}
+		else
+		{
+	        if (patch_vt->destroy_user_data)
+	        {
+	            patch_vt->destroy_user_data(glob,this_patch);
+	        }
 
-        patch_vt->patch_delete(pdata->user_patch);
-        ++domain->count_delete_patch;
+			patch_vt->patch_delete(pdata->user_patch);
 
-		FCLAW_FREE(pdata);
+			FCLAW_FREE(pdata);
+		}
+
+		++domain->count_delete_patch;
 		this_patch->user = NULL;
 	}
 }
@@ -235,6 +244,22 @@ void fclaw_patch_build_from_fine(fclaw_global_t *glob,
         patch_vt->setup(glob,coarse_patch,blockno,coarse_patchno);
     }
 }
+
+void fclaw_patch_shallow_copy(struct fclaw_global *glob,
+                              struct fclaw_domain *src_domain,
+                              struct fclaw_patch *src_patch,
+                              struct fclaw_domain *dst_domain,
+                              struct fclaw_patch *dst_patch,
+							  int blockno,
+							  int old_patchno,
+							  int new_patchno)
+{
+	fclaw_patch_data_t *pdata = get_patch_data(src_patch);
+	dst_patch->user = pdata;
+	++pdata->num_owners;
+	++dst_domain->count_set_patch;
+}
+
 
 #if 0
 void fclaw2d_patch_create_user_data(fclaw2d_global_t* glob,
@@ -826,7 +851,7 @@ void fclaw_patch_partition_unpack(fclaw_global_t *glob,
 
 	fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
 
-	fclaw_patch_build(glob,glob->domain,this_patch,this_block_idx,
+	fclaw_patch_build(glob,new_domain,this_patch,this_block_idx,
 						this_patch_idx,(void*) &build_mode);
 
 	/* This copied q data from memory */
