@@ -64,10 +64,12 @@ void cb_initialize (fclaw_domain_t *domain,
 
 	fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
 
-	fclaw_patch_build(g->glob,this_patch,
-						this_block_idx,
-						this_patch_idx,
-						&build_mode);
+	fclaw_patch_build(g->glob,
+                      domain,
+                      this_patch,
+                      this_block_idx,
+                      this_patch_idx,
+                      &build_mode);
 	fclaw_patch_initialize(g->glob,this_patch,this_block_idx,this_patch_idx);
 }
 

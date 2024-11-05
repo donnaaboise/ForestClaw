@@ -285,7 +285,7 @@ TEST_CASE("3d fclaw_clawpatch patch_build")
         fclaw_clawpatch_vtable_initialize(glob, 4);
 
                 CHECK(domain->blocks[0].patches[0].user == nullptr);
-        fclaw_patch_build(glob, &domain->blocks[0].patches[0], 0, 0, &build_mode);
+        fclaw_patch_build(glob,domain, &domain->blocks[0].patches[0], 0, 0, &build_mode);
         CHECK(domain->blocks[0].patches[0].user != nullptr);
 
         fclaw_clawpatch_t* cp = fclaw_clawpatch_get_clawpatch(&domain->blocks[0].patches[0]);
@@ -343,7 +343,7 @@ TEST_CASE("3d fclaw_clawpatch patch_build")
             CHECK_BOX_DIMENSIONS(cp->elliptic_soln, opts->mbc, opts->mx, opts->my, opts->mz, opts->rhs_fields);
         }
 
-        fclaw_patch_data_delete(glob, &domain->blocks[0].patches[0]);
+        fclaw_patch_data_delete(glob,domain, &domain->blocks[0].patches[0]);
         fclaw_clawpatch_options_destroy(opts);
         fclaw_domain_destroy(domain);
         fclaw_map_destroy(map);

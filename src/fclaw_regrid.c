@@ -121,25 +121,6 @@ void cb_regrid_tag4coarsening(fclaw_domain_t *domain,
     }
 }
 
-static
-void build_and_initalize_fine_patch(fclaw_global_t *glob,
-                                    fclaw_patch_t *fine_patch,
-                                    int blockno,
-                                    int fine_patchno,
-                                    int domain_init)
-{
-    fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
-
-    fclaw_patch_build(glob,fine_patch,blockno,
-                      fine_patchno,(void*) &build_mode);
-    if (domain_init)
-    {
-        fclaw_patch_initialize(glob,fine_patch,blockno,fine_patchno);//new_domain
-    }
-    /* don't try to refine this patch in the next round of refinement */
-    fclaw_patch_considered_for_refinement_set(glob, fine_patch);
-}
-
 static 
 void refine_patch(fclaw_global_t *glob,
                   fclaw_domain_t *old_domain, 
@@ -148,42 +129,54 @@ void refine_patch(fclaw_global_t *glob,
                   fclaw_patch_t *fine_siblings,
                   int blockno,
 				  int coarse_patchno,
-				  int fine_patchno,
+				  int fine0_patchno,
                   int domain_init)
 {
     fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
 
     for (int i = 0; i < fclaw_domain_num_siblings(old_domain); i++)
     {
-        /* Set up first patch in family */
-        build_and_initalize_fine_patch(glob, &fine_siblings[i],
-                                       blockno, fine_patchno + i, domain_init);
-        /* Reason for the following two lines: the glob contains the old domain which is incremented in ddata_old 
-           but we really want to increment the new domain. This will be fixed! */
-        --old_domain->count_set_patch;
-        ++new_domain->count_set_patch;
-    }
+        fclaw_patch_t *fine_patch = &fine_siblings[i];
+        int fine_patchno = fine0_patchno + i;
+        fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
 
-    if (!domain_init)
-    {
-        for(int i = 0; i < fclaw_domain_num_siblings(old_domain); i++)
+        fclaw_patch_build(glob,new_domain,fine_patch,blockno,
+                          fine_patchno,(void*) &build_mode);
+
+        /* set the data */
+        if (fclaw_opt->regrid_mode != FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER)
         {
-            if(fclaw_opt->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER)
+            if(domain_init)
             {
-                fclaw_patch_store_coarse_in_fine(glob,coarse_patch,&fine_siblings[i],
-                                                 blockno,coarse_patchno,fine_patchno + i);
-                fclaw_patch_has_coarse_data_set(glob, &fine_siblings[i]);
+                fclaw_patch_initialize(glob,fine_patch,blockno,fine_patchno);
             }
             else
             {
-                fclaw_patch_interpolate2fine(glob,coarse_patch,&fine_siblings[i],
-                                             blockno,coarse_patchno,fine_patchno+i,i);//new_domain
+                fclaw_patch_interpolate2fine(glob,coarse_patch,fine_patch,
+                                             blockno,coarse_patchno,fine_patchno,i);
             }
+        }
+        else
+        {
+            fclaw_patch_has_coarse_data_set(glob, fine_patch);
+            if(!domain_init)
+            {
+                fclaw_patch_store_coarse_in_fine(glob,coarse_patch,fine_patch,
+                                                 blockno,coarse_patchno,fine_patchno);
+            }
+        }
+
+        /* don't try to refine this patch in the next round of refinement */
+        fclaw_patch_considered_for_refinement_set(glob, fine_patch);
+
+        if(fclaw_opt->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER)
+        {
+            fclaw_patch_has_coarse_data_set(glob, fine_patch);
         }
     }
 
     /* used to pass in old_domain */
-    fclaw_patch_data_delete(glob,coarse_patch);
+    fclaw_patch_data_delete(glob,old_domain,coarse_patch);
 
 }
 
@@ -199,7 +192,11 @@ void cb_refine_after_partition(fclaw_domain_t *domain,
 
     if(fclaw_patch_has_coarse_data(g->glob, patch))
     {
-        if(!domain_init)
+        if(domain_init)
+        {
+            fclaw_patch_initialize(g->glob,patch,blockno,patchno);
+        }
+        else
         {
             int igrid = fclaw_patch_childid(patch);
             double width = patch->xupper - patch->xlower;
@@ -241,20 +238,20 @@ void cb_refine_after_partition(fclaw_domain_t *domain,
 
             fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
 
-            fclaw_patch_build(g->glob,&artificial_patch,blockno,
+            fclaw_patch_build(g->glob,domain,&artificial_patch,blockno,
                               -1,(void*) &build_mode);
 
             fclaw_patch_get_coarse_from_fine(g->glob,&artificial_patch,patch,
                                              blockno,patchno);
-            fclaw_patch_has_coarse_data_clear(g->glob, patch);
 
             fclaw_patch_interpolate2fine(g->glob,&artificial_patch,patch,
                                          blockno,-1,patchno,igrid);
         
-            fclaw_patch_data_delete(g->glob, &artificial_patch);
+            fclaw_patch_data_delete(g->glob,domain, &artificial_patch);
         
         }
 
+        fclaw_patch_has_coarse_data_clear(g->glob, patch);
     }
     
 
@@ -312,21 +309,16 @@ void cb_fclaw_regrid_repopulate(fclaw_domain_t * old_domain,
         fclaw_patch_t *coarse_patch = new_patch;
         int coarse_patchno = new_patchno;
         
-        /* Reason for the following two lines: the glob contains the old domain which is incremented in ddata_old 
-           but we really want to increment the new domain. This will be fixed! */
-        --old_domain->count_set_patch;
-        ++new_domain->count_set_patch;
-        
         if (domain_init)
         {
-            fclaw_patch_build(g->glob,coarse_patch,blockno,
+            fclaw_patch_build(g->glob,new_domain,coarse_patch,blockno,
                                 coarse_patchno,(void*) &build_mode);
             fclaw_patch_initialize(g->glob,coarse_patch,blockno,coarse_patchno);
         }
         else
         {
             /* Area (and possibly other things) should be averaged to coarse grid. */
-            fclaw_patch_build_from_fine(g->glob,fine_siblings,coarse_patch,
+            fclaw_patch_build_from_fine(g->glob,new_domain,fine_siblings,coarse_patch,
                                           blockno,coarse_patchno,fine_patchno,
                                           build_mode);
             /* Average the solution. Does this need to be customizable? */
@@ -339,7 +331,7 @@ void cb_fclaw_regrid_repopulate(fclaw_domain_t * old_domain,
         {
             fclaw_patch_t* fine_patch = &fine_siblings[i];
             /* used to pass in old_domain */
-            fclaw_patch_data_delete(g->glob,fine_patch);
+            fclaw_patch_data_delete(g->glob,old_domain,fine_patch);
         }
         /* don't try to refine this patch in the next round of refinement */
         fclaw_patch_considered_for_refinement_set(g->glob, coarse_patch);

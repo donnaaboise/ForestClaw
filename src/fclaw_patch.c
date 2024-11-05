@@ -59,6 +59,7 @@ void* get_user_patch(fclaw_patch_t* patch)
 
 static
 void patch_data_new(fclaw_global_t* glob,
+				    fclaw_domain_t* domain,
 					fclaw_patch_t* this_patch,
 					int this_block_idx, int this_patch_idx)
 {
@@ -87,7 +88,7 @@ void patch_data_new(fclaw_global_t* glob,
 	FCLAW_ASSERT(patch_vt->patch_new != NULL);
 	pdata->user_patch = patch_vt->patch_new();
 
-	++glob->domain->count_set_patch; //this is now in cb_fclaw2d_regrid_repopulate 
+	++domain->count_set_patch; //this is now in cb_fclaw2d_regrid_repopulate 
 	pdata->neighbors_set = 0;
 	pdata->flags = 0;
 }
@@ -137,7 +138,8 @@ void fclaw_patch_reset_data(fclaw_global_t* glob,
 }
 
 void fclaw_patch_data_delete(fclaw_global_t *glob,
-							   fclaw_patch_t *this_patch)
+							 fclaw_domain_t *domain,
+							 fclaw_patch_t *this_patch)
 {
 	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
 	FCLAW_ASSERT(patch_vt->patch_delete != NULL);
@@ -151,7 +153,7 @@ void fclaw_patch_data_delete(fclaw_global_t *glob,
         }
 
         patch_vt->patch_delete(pdata->user_patch);
-        ++glob->domain->count_delete_patch;
+        ++domain->count_delete_patch;
 
 		FCLAW_FREE(pdata);
 		this_patch->user = NULL;
@@ -159,15 +161,16 @@ void fclaw_patch_data_delete(fclaw_global_t *glob,
 }
 
 void fclaw_patch_build(fclaw_global_t *glob,
-						 fclaw_patch_t *this_patch,
-						 int blockno,
-						 int patchno,
-						 void *user)
+					   fclaw_domain_t *domain,
+					   fclaw_patch_t *this_patch,
+					   int blockno,
+					   int patchno,
+					   void *user)
 {
 	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
 
 	/* This is where we store 'user' (from the point of view of a p4est user) data */
-	patch_data_new(glob,this_patch,blockno, patchno);
+	patch_data_new(glob,domain,this_patch,blockno, patchno);
 
 	FCLAW_ASSERT(patch_vt->build != NULL);
 	patch_vt->build(glob,
@@ -198,17 +201,18 @@ void fclaw_patch_build(fclaw_global_t *glob,
 
 
 void fclaw_patch_build_from_fine(fclaw_global_t *glob,
-                                   fclaw_patch_t *fine_patches,
-                                   fclaw_patch_t *coarse_patch,
-                                   int blockno,
-                                   int coarse_patchno,
-                                   int fine0_patchno,
-                                   fclaw_build_mode_t build_mode)
+								 fclaw_domain_t *domain,
+								 fclaw_patch_t *fine_patches,
+								 fclaw_patch_t *coarse_patch,
+								 int blockno,
+								 int coarse_patchno,
+								 int fine0_patchno,
+								 fclaw_build_mode_t build_mode)
 {
     fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
     FCLAW_ASSERT(patch_vt->build_from_fine != NULL);
 
-    patch_data_new(glob,coarse_patch,blockno, coarse_patchno);
+    patch_data_new(glob,domain,coarse_patch,blockno, coarse_patchno);
 
     fclaw_patch_data_t *pdata = get_patch_data(coarse_patch);
     pdata->block_idx = blockno;
@@ -734,7 +738,7 @@ void fclaw_patch_remote_ghost_build(fclaw_global_t *glob,
 
 	FCLAW_ASSERT(patch_vt->remote_ghost_build != NULL);
 
-	patch_data_new(glob,this_patch,blockno,patchno);
+	patch_data_new(glob,glob->domain,this_patch,blockno,patchno);
 
 	patch_vt->remote_ghost_build(glob,this_patch,blockno,
 							patchno,build_mode);
@@ -822,7 +826,7 @@ void fclaw_patch_partition_unpack(fclaw_global_t *glob,
 
 	fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
 
-	fclaw_patch_build(glob,this_patch,this_block_idx,
+	fclaw_patch_build(glob,glob->domain,this_patch,this_block_idx,
 						this_patch_idx,(void*) &build_mode);
 
 	/* This copied q data from memory */

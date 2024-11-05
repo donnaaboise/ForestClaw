@@ -220,30 +220,35 @@ struct fclaw_region;
  * @brief Deallocate the user data pointer for a patch
  * 
  * @param[in] glob the global context 
+ * @param[in] domain the domain
  * @param[in,out] patch the patch context, user data pointer is set to NULL on return
  */
 void fclaw_patch_data_delete(struct fclaw_global *glob,
-                               struct fclaw_patch *patch);
+                             struct fclaw_domain *domain,
+                             struct fclaw_patch *patch);
 
 /**
  * @brief Construct a new patch object
  * 
  * @param[in] glob the global context
+ * @param[in] domain the domain
  * @param[in,out] this_patch the patch context
  * @param[in] blockno the block number
  * @param[in] patchno the patch number
  * @param[in,out] user user data pointer
  */
 void fclaw_patch_build(struct fclaw_global *glob,
-                         struct fclaw_patch *this_patch,
-                         int blockno,
-                         int patchno,
-                         void *user);
+                       struct fclaw_domain *domain,
+                       struct fclaw_patch *this_patch,
+                       int blockno,
+                       int patchno,
+                       void *user);
 
 /**
  * @brief Construct a new patch object from a set of fine patches
  * 
  * @param[in] glob the global context
+ * @param[in] domain the domain
  * @param[in] fine_patches the fine patch contexts
  * @param[in,out] coarse_patches the coarse patch context
  * @param[in] blockno the block number
@@ -252,12 +257,13 @@ void fclaw_patch_build(struct fclaw_global *glob,
  * @param[in] build_mode the build mode
  */
 void fclaw_patch_build_from_fine(struct fclaw_global *glob,
-                                   struct fclaw_patch *fine_patches,
-                                   struct fclaw_patch *coarse_patch,
-                                   int blockno,
-                                   int coarse_patchno,
-                                   int fine0_patchno,
-                                   fclaw_build_mode_t build_mode);
+                                 struct fclaw_domain *domain,
+                                 struct fclaw_patch *fine_patches,
+                                 struct fclaw_patch *coarse_patch,
+                                 int blockno,
+                                 int coarse_patchno,
+                                 int fine0_patchno,
+                                 fclaw_build_mode_t build_mode);
 
 
 ///@}
