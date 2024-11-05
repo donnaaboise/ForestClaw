@@ -138,14 +138,14 @@ void refine_patch(fclaw_global_t *glob,
     {
         fclaw_patch_t *fine_patch = &fine_siblings[i];
         int fine_patchno = fine0_patchno + i;
-        fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
-
-        fclaw_patch_build(glob,new_domain,fine_patch,blockno,
-                          fine_patchno,(void*) &build_mode);
 
         /* set the data */
         if (fclaw_opt->regrid_mode != FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER)
         {
+            fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
+            fclaw_patch_build(glob,new_domain,fine_patch,blockno,
+                              fine_patchno,(void*) &build_mode);
+
             if(domain_init)
             {
                 fclaw_patch_initialize(glob,fine_patch,blockno,fine_patchno);
@@ -158,11 +158,11 @@ void refine_patch(fclaw_global_t *glob,
         }
         else
         {
+            fclaw_patch_shallow_copy(glob,old_domain,coarse_patch,new_domain,
+                                     fine_patch,blockno,coarse_patchno,fine_patchno);
             fclaw_patch_has_coarse_data_set(glob, fine_patch);
             if(!domain_init)
             {
-                fclaw_patch_store_coarse_in_fine(glob,coarse_patch,fine_patch,
-                                                 blockno,coarse_patchno,fine_patchno);
             }
         }
 
@@ -194,6 +194,10 @@ void cb_refine_after_partition(fclaw_domain_t *domain,
     {
         if(domain_init)
         {
+            fclaw_patch_data_delete(g->glob,domain,patch);
+            fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
+            fclaw_patch_build(g->glob,domain,patch,blockno,
+                              patchno,(void*) &build_mode);
             fclaw_patch_initialize(g->glob,patch,blockno,patchno);
         }
         else
@@ -236,13 +240,14 @@ void cb_refine_after_partition(fclaw_domain_t *domain,
             artificial_patch.refine_dim = 2;
             artificial_patch_2d.user = &artificial_patch;
 
+
+            fclaw_patch_shallow_copy(g->glob,domain,patch,domain,&artificial_patch,
+                                     blockno,patchno,-1);
+            fclaw_patch_data_delete(g->glob,domain,patch);
+
             fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
-
-            fclaw_patch_build(g->glob,domain,&artificial_patch,blockno,
-                              -1,(void*) &build_mode);
-
-            fclaw_patch_get_coarse_from_fine(g->glob,&artificial_patch,patch,
-                                             blockno,patchno);
+            fclaw_patch_build(g->glob,domain,patch,blockno,
+                              patchno,(void*) &build_mode);
 
             fclaw_patch_interpolate2fine(g->glob,&artificial_patch,patch,
                                          blockno,-1,patchno,igrid);
