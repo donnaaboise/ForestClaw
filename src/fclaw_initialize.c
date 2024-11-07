@@ -83,9 +83,6 @@ void build_initial_domain(fclaw_global_t *glob)
     int minlevel = fclaw_opt->minlevel;
     int maxlevel = fclaw_opt->maxlevel;
 
-    /* Initialize regions */
-    fclaw_regions_initialize(glob);
-
     int time_interp = 0;
 
     /* ------------------------------------------------
@@ -258,6 +255,9 @@ pre_setup(fclaw_global_t* glob)
 
     /* User defined problem setup */
     fclaw_problem_setup(glob);
+
+    /* Initialize regions */
+    fclaw_regions_initialize(glob);
 }
 
 static void
