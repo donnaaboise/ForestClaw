@@ -590,7 +590,7 @@ fclaw_options_t* fclaw_options_register (fclaw_app_t * a,
         fclaw_opt_sections = sc_keyvalue_new();
         fclaw_app_set_attribute(a, "fclaw_opt_sections", fclaw_opt_sections);
     }
-    char *key = strdup(section == NULL ? "Options" : section);
+    char *key = FCLAW_STRDUP(section == NULL ? "Options" : section);
     char* curr_char = key;
     while(*curr_char != '\0')
     {
@@ -602,6 +602,7 @@ fclaw_options_t* fclaw_options_register (fclaw_app_t * a,
     sc_keyvalue_set_int(fclaw_opt_sections, 
                         key,
                         1);
+    FCLAW_FREE(key);
     
     return fclaw_opt;
 }
