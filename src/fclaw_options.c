@@ -383,13 +383,13 @@ fclaw_register (fclaw_options_t* fclaw_opt, sc_options_t * opt)
                           "Ratio of patches to refine before paritioning and continuing refinement. [1.0]");
 
     kv = fclaw_opt->kv_regrid_mode = sc_keyvalue_new ();
-    sc_keyvalue_set_int (kv, "legacy",                 FCLAW_OPTIONS_REGRID_MODE_OLD);
-    sc_keyvalue_set_int (kv, "pack-all",               FCLAW_OPTIONS_REGRID_MODE_NEW); 
-    sc_keyvalue_set_int (kv, "skip-local",             FCLAW_OPTIONS_REGRID_MODE_SKIP_LOCAL);
-    sc_keyvalue_set_int (kv, "refine-after-partition", FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER);
-    sc_options_add_keyvalue (opt, 0, "regrid-mode", 
-                             &fclaw_opt->regrid_mode,
-                             "legacy", kv, "Regrid mode [legacy]");
+    sc_keyvalue_set_int (kv, "legacy",                 FCLAW_PARTITION_MODE_LEGACY);
+    sc_keyvalue_set_int (kv, "pack-all",               FCLAW_PARTITION_MODE_PACK_ALL); 
+    sc_keyvalue_set_int (kv, "skip-local",             FCLAW_PARTITION_MODE_SKIP_LOCAL);
+    sc_keyvalue_set_int (kv, "refine-after-partition", FCLAW_PARTITION_MODE_REFINE_AFTER);
+    sc_options_add_keyvalue (opt, 0, "partition-mode", 
+                             &fclaw_opt->partition_mode,
+                             "legacy", kv, "Parition mode to use. One of (legacy, pack-all, skip-local, refine-after-partition) [legacy]");
 
     fclaw_opt->is_registered = 1;
     fclaw_opt->is_unpacked = 0;

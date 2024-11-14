@@ -112,13 +112,20 @@ void fclaw_options_convert_double_array (const char *array_string,
 void fclaw_options_destroy_array(void* array);
 
 
-typedef enum fclaw_options_regrid_mode
+/**
+ * @brief Enum for partition mode
+ */
+enum fclaw_parition_mode
 {
-    FCLAW_OPTIONS_REGRID_MODE_OLD,
-    FCLAW_OPTIONS_REGRID_MODE_NEW,
-    FCLAW_OPTIONS_REGRID_MODE_SKIP_LOCAL,
-    FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER
-} fclaw_options_regrid_mode_t;
+    /** Use legacy paritioning interface */
+    FCLAW_PARTITION_MODE_LEGACY,
+    /** Pack/unpack all patches */
+    FCLAW_PARTITION_MODE_PACK_ALL,
+    /** Skip packing of local patches */
+    FCLAW_PARTITION_MODE_SKIP_LOCAL,
+    /** Skip packing of local patches and refine after partitioning */
+    FCLAW_PARTITION_MODE_REFINE_AFTER
+};
 
 
 struct fclaw_options
@@ -261,7 +268,7 @@ struct fclaw_options
 
     double max_refinement_ratio; /**< Maximum refinment ratio before partitioning and continuing refinement. */
 
-    int regrid_mode; /**< Regrid mode */
+    int partition_mode; /**< Partition mode */
     sc_keyvalue_t *kv_regrid_mode; /**< sc_keyvalue needed for enum option type */
 };
 

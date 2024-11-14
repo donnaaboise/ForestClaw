@@ -138,7 +138,7 @@ void  cb_transfer_and_unpack(fclaw_domain_t * old_domain,
 
 /* old partitioning interface, kept for comparison */
 static
-void partition_domain_old(fclaw_global_t* glob,
+void partition_domain_legacy(fclaw_global_t* glob,
                           fclaw_timer_names_t running)
 {
     fclaw_domain_t** domain = &glob->domain;
@@ -265,9 +265,9 @@ void partition_domain(fclaw_global_t* glob,
 void fclaw_partition_domain(fclaw_global_t* glob,
                               fclaw_timer_names_t running)
 {
-    if(fclaw_get_options(glob)->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_OLD)
+    if(fclaw_get_options(glob)->partition_mode == FCLAW_PARTITION_MODE_LEGACY)
     {
-        partition_domain_old(glob,running);
+        partition_domain_legacy(glob,running);
     }
     else
     {

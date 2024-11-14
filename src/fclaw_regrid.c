@@ -140,7 +140,7 @@ void refine_patch(fclaw_global_t *glob,
         int fine_patchno = fine0_patchno + i;
 
         /* set the data */
-        if (fclaw_opt->regrid_mode != FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER)
+        if (fclaw_opt->partition_mode != FCLAW_PARTITION_MODE_REFINE_AFTER)
         {
             fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
             fclaw_patch_build(glob,new_domain,fine_patch,blockno,
@@ -169,7 +169,7 @@ void refine_patch(fclaw_global_t *glob,
         /* don't try to refine this patch in the next round of refinement */
         fclaw_patch_considered_for_refinement_set(glob, fine_patch);
 
-        if(fclaw_opt->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER)
+        if(fclaw_opt->partition_mode == FCLAW_PARTITION_MODE_REFINE_AFTER)
         {
             fclaw_patch_has_coarse_data_set(glob, fine_patch);
         }
@@ -372,7 +372,7 @@ void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
     fclaw_partition_domain(glob,timer);
 
     /* refine after partition (if_needed) */
-    if(fclaw_opt->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER)
+    if(fclaw_opt->partition_mode == FCLAW_PARTITION_MODE_REFINE_AFTER)
     {
         fclaw_global_iterate_patches(glob, cb_refine_after_partition,
                                      (void *) &domain_init);

@@ -202,10 +202,10 @@ void fclaw_initialize_domain_flags(fclaw_global_t *glob)
         (glob->domain, fclaw_opt->smooth_refine, fclaw_opt->smooth_level,
          fclaw_opt->coarsen_delay);
 
-    int skip_local = fclaw_opt->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_SKIP_LOCAL || 
-                     fclaw_opt->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER;
+    int skip_local = fclaw_opt->partition_mode == FCLAW_PARTITION_MODE_SKIP_LOCAL || 
+                     fclaw_opt->partition_mode == FCLAW_PARTITION_MODE_REFINE_AFTER;
     
-    int skip_refined = fclaw_opt->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER;
+    int skip_refined = fclaw_opt->partition_mode == FCLAW_PARTITION_MODE_REFINE_AFTER;
 
     /* set partitioning */
     fclaw_domain_set_partitioning (glob->domain,
