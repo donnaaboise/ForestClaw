@@ -352,7 +352,7 @@ void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
                                          fclaw_domain_t **domain,
                                          fclaw_domain_t *new_domain,
                                          int domain_init,
-                                         int timer)
+                                         fclaw_timer_names_t timer)
 {
     fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
 

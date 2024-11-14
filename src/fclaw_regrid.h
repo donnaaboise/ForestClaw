@@ -26,6 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FCLAW_REGRID_H
 #define FCLAW_REGRID_H
 
+#include "fclaw_timer.h"
 #include <forestclaw.h>    /* Needed to define fclaw2d_patch_relation_t */
 
 #ifdef __cplusplus
@@ -108,7 +109,7 @@ void fclaw_regrid_process_new_refinement(struct fclaw_global *glob,
                                          fclaw_domain_t **domain,
                                          fclaw_domain_t *new_domain,
                                          int domain_init,
-                                         int timer);
+                                         fclaw_timer_names_t timer);
 
 #ifdef __cplusplus
 #if 0
