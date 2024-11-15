@@ -54,11 +54,12 @@ static fclaw_exit_type_t
 disk_check (user_options_t *user_opt)
 {
 
-    if (user_opt->example < 0 || user_opt->example > 1) {
+    if (user_opt->example < 0 || user_opt->example > 1) 
+    {
         fclaw_global_essentialf ("Option --user:example must be 0 or 1\n");
+        return FCLAW_EXIT_QUIET;
     }
-    /* Print the summary after we have done a global option check */
-    return FCLAW_EXIT_QUIET;
+    return FCLAW_NOEXIT;
 }
 
 static void
