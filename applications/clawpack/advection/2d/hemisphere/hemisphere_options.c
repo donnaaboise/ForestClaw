@@ -28,12 +28,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static void *
 hemisphere_register (user_options_t* user_opt, sc_options_t * opt)
 {
-    sc_options_add_int (opt, 0, "example", &user_opt->example, 2,
+    sc_options_add_int (opt, 0, "example", &user_opt->example, 1,
+                        "[user] Example number");
+
+    sc_options_add_int (opt, 0, "mapping", &user_opt->mapping, 0,
                         "[user] 0 for five-patch hemisphere, "    \
-                        "1 for pillowsphere[2]");
+                        "1 for pillowsphere [0]");
 
     sc_options_add_double (opt, 0, "alpha", &user_opt->alpha, 0.4,
                            "Ratio of outer square to inner square [0.4]");
+
+    sc_options_add_double (opt, 0, "revs_per_sec", &user_opt->revs_per_second, 0.5,
+                           "Revolutions per second [0.5]");
 
     sc_options_add_int (opt, 0, "claw-version", &user_opt->claw_version, 4,
                            "Clawpack_version (4 or 5) [4]");

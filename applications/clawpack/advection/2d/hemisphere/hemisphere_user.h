@@ -40,7 +40,13 @@ extern "C"
 typedef struct user_options
 {
     int example;
+    
+    /* Mapping paramters */
+    int mapping;
     double alpha;
+
+    double revs_per_second;
+
 
     int claw_version;
     int is_registered;

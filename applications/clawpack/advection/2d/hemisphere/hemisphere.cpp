@@ -37,33 +37,27 @@ void create_domain(fclaw_global_t *glob)
     rotate[0] = pi*fclaw_opt->theta/180.0;
     rotate[1] = 0;
 
-#if 0
-    const fclaw2d_clawpatch_options_t *clawpatch_opt = 
-           fclaw2d_clawpatch_get_options(glob);
+    const fclaw_clawpatch_options_t *clawpatch_opt = 
+           fclaw_clawpatch_get_options(glob);
 
     int mi = fclaw_opt->mi;
     int mx = clawpatch_opt->mx;
     int minlevel = fclaw_opt->minlevel;
-#endif    
 
     /* Mapped, multi-block domain */
     fclaw_domain_t *domain;
     fclaw_map_context_t *cont = NULL;
 
     user_options_t *user_opt = (user_options_t*) hemisphere_get_options(glob);
-    switch (user_opt->example) {
+    switch (user_opt->mapping) {
     case 0:
-#if 0    
-        /* We should really be checking this - to avoid problems with ghost cells at 
-           the triple points in the mapping 
-        */
         if (mi*mx*pow_int(2,minlevel) < 32)
         {
             fclaw_global_essentialf("The five patch mapping requires mi*mx*2^minlevel > 32\n");
             exit(0);
 
         }
-#endif        
+
         /* Five patch square domain */
         domain =
             fclaw_domain_new_2d_disk(glob->mpicomm, 0, 0,
@@ -75,8 +69,6 @@ void create_domain(fclaw_global_t *glob)
         break;
 
     case 1:
-        /* Map unit square to disk using mapc2m_disk.f */
-        /* Map unit square to the pillow disk using mapc2m_pillowdisk.f */
         domain =
             fclaw_domain_new_unitsquare (glob->mpicomm,
                                            fclaw_opt->minlevel);

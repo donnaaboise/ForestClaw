@@ -1,5 +1,5 @@
 
-OutputFlag = 'forestclaw'         % default value.
+OutputFlag = 'forestclaw';         % default value.
 
 ForestClaw = 1;
 

@@ -25,6 +25,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "hemisphere_user.h"
 
+void hemisphere_problem_setup(fclaw_global_t *glob)
+{
+    const user_options_t* user = hemisphere_get_options(glob);
+    if (glob->mpirank == 0)
+    {
+        FILE *f = fopen("setprob.data","w");
+        fprintf(f,  "%-24d   %s",user->example,"\% example\n");
+        fprintf(f,  "%-24d   %s",user->mapping,"\% mapping\n");
+        fprintf(f,  "%-24.4f   %s",user->alpha,"\% alpha\n");
+        fprintf(f,  "%-24.4f   %s",user->revs_per_second,"\% revs_per_sec\n");
+        fclose(f);
+    }
+    fclaw_domain_barrier (glob->domain);
+    SETPROB();
+}
+
+
 static
 void hemisphere_patch_setup(fclaw_global_t *glob,
                             fclaw_patch_t *patch,
@@ -41,6 +58,9 @@ void hemisphere_link_solvers(fclaw_global_t *glob)
 {
     fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
     patch_vt->setup      = &hemisphere_patch_setup;    
+
+    fclaw_vtable_t *fc_vt = fclaw_vt(glob);
+    fc_vt->problem_setup = hemisphere_problem_setup;
 
     const user_options_t* user = hemisphere_get_options(glob);
     if (user->claw_version == 4)

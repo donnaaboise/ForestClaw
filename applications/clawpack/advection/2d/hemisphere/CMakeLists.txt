@@ -1,10 +1,10 @@
 set(all ${PROJECT_SOURCE_DIR}/clawpack/advection/2d/all)
 
 add_library(hemisphere_f OBJECT 
-  setprob.f 
-  fdisc.f 
-  psi.f 
-  user_4.6/qinit.f 
+  setprob.f90 
+  fdisc.f90 
+  psi.f90 
+  user_4.6/qinit.f90 
   user_5.0/qinit.f90 
   ${all}/user46_setaux_manifold.f 
   ${all}/user5_setaux_manifold.f90 
