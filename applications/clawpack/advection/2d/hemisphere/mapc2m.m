@@ -10,10 +10,14 @@ alpha = parms.alpha;
 
 switch map
     case 'pillowsphere5'
-        % Map to [-1,1] x [-1,1]
-        [xp,yp,~] = mapc2m_pillowdisk5(xc,yc,alpha);
-        r2 = min(xp.^2 + yp.^2,1);
-        zp = sqrt(1 - r2);
+
+        [xp,yp,zp] = mapc2m_fivepatch(xc,yc,alpha);
+        xc = (xp + 1)/2;
+        yc = (yp + 1)/2;
+        [xp,yp,zp] = mapc2m_pillowsphere(xc,yc);
+
+        zp = abs(zp);  
+        
     case 'pillow'
         [xp,yp,zp] = mapc2m_pillowsphere(xc,yc);
 
