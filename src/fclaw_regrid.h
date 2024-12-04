@@ -26,8 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FCLAW_REGRID_H
 #define FCLAW_REGRID_H
 
-#include "fclaw_timer.h"
 #include <forestclaw.h>    /* Needed to define fclaw2d_patch_relation_t */
+#include <fclaw_timer.h>
 
 #ifdef __cplusplus
 extern "C"
