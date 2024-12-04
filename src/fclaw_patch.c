@@ -23,7 +23,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "forestclaw.h"
 #include <fclaw_patch.h>
 #include <fclaw_global.h>
 #include <fclaw_domain.h>
@@ -874,40 +873,93 @@ void fclaw_patch_partition_unpack(fclaw_global_t *glob,
         int igrid = fclaw_patch_childid(patch);
         double width = patch->xupper - patch->xlower;
         double height = patch->yupper - patch->ylower;
+        double depth = patch->zupper - patch->zlower;
         fclaw2d_patch_t artificial_patch_2d;
-        artificial_patch_2d.level  = patch->level-1;
-        artificial_patch_2d.xlower = patch->xlower;
-        artificial_patch_2d.ylower = patch->ylower;
-        artificial_patch_2d.xupper = patch->xupper;
-        artificial_patch_2d.yupper = patch->yupper;
-        artificial_patch_2d.flags  = patch->d2->flags;
-        int lower_x_axis = !(igrid & 0x1);
-        if(lower_x_axis)
-        {
-            artificial_patch_2d.xupper += width;
-        }
-        else
-        {
-            artificial_patch_2d.xlower -= width;
-        }
-        int lower_y_axis = !(igrid & 0x2);
-        if(lower_y_axis)
-        {
-            artificial_patch_2d.yupper += height;
-        }
-        else
-        {
-            artificial_patch_2d.ylower -= height;
-        }
+        fclaw3d_patch_t artificial_patch_3d;
         fclaw_patch_t artificial_patch;
-        artificial_patch.level  = artificial_patch_2d.level;
-        artificial_patch.xlower = artificial_patch_2d.xlower;
-        artificial_patch.ylower = artificial_patch_2d.ylower;
-        artificial_patch.xupper = artificial_patch_2d.xupper;
-        artificial_patch.yupper = artificial_patch_2d.yupper;
-        artificial_patch.d2 = &artificial_patch_2d;
-        artificial_patch.refine_dim = 2;
-        artificial_patch_2d.user = &artificial_patch;
+		if(patch->refine_dim == 2)
+		{
+        	artificial_patch_2d.level  = patch->level-1;
+        	artificial_patch_2d.xlower = patch->xlower;
+        	artificial_patch_2d.ylower = patch->ylower;
+        	artificial_patch_2d.xupper = patch->xupper;
+        	artificial_patch_2d.yupper = patch->yupper;
+        	artificial_patch_2d.flags  = patch->d2->flags;
+        	int lower_x_axis = !(igrid & 0x1);
+        	if(lower_x_axis)
+        	{
+        	    artificial_patch_2d.xupper += width;
+        	}
+        	else
+        	{
+        	    artificial_patch_2d.xlower -= width;
+        	}
+        	int lower_y_axis = !(igrid & 0x2);
+        	if(lower_y_axis)
+        	{
+        	    artificial_patch_2d.yupper += height;
+        	}
+        	else
+        	{
+        	    artificial_patch_2d.ylower -= height;
+        	}
+        	artificial_patch.level  = artificial_patch_2d.level;
+        	artificial_patch.xlower = artificial_patch_2d.xlower;
+        	artificial_patch.ylower = artificial_patch_2d.ylower;
+        	artificial_patch.xupper = artificial_patch_2d.xupper;
+        	artificial_patch.yupper = artificial_patch_2d.yupper;
+        	artificial_patch.d2 = &artificial_patch_2d;
+        	artificial_patch.refine_dim = 2;
+        	artificial_patch_2d.user = &artificial_patch;
+		}
+		else
+		{
+			artificial_patch_3d.level  = patch->level-1;
+			artificial_patch_3d.xlower = patch->xlower;
+			artificial_patch_3d.ylower = patch->ylower;
+			artificial_patch_3d.zlower = patch->zlower;
+			artificial_patch_3d.xupper = patch->xupper;
+			artificial_patch_3d.yupper = patch->yupper;
+			artificial_patch_3d.zupper = patch->zupper;
+			artificial_patch_3d.flags  = patch->d3->flags;
+			int lower_x_axis = !(igrid & 0x1);
+			if(lower_x_axis)
+			{
+			    artificial_patch_3d.xupper += width;
+			}
+			else
+			{
+			    artificial_patch_3d.xlower -= width;
+			}
+			int lower_y_axis = !(igrid & 0x2);
+			if(lower_y_axis)
+			{
+			    artificial_patch_3d.yupper += height;
+			}
+			else
+			{
+			    artificial_patch_3d.ylower -= height;
+			}
+			int lower_z_axis = !(igrid & 0x4);
+			if(lower_z_axis)
+			{
+			    artificial_patch_3d.zupper += depth;
+			}
+			else
+			{
+			    artificial_patch_3d.zlower -= depth;
+			}
+			artificial_patch.level  = artificial_patch_3d.level;
+			artificial_patch.xlower = artificial_patch_3d.xlower;
+			artificial_patch.ylower = artificial_patch_3d.ylower;
+			artificial_patch.zlower = artificial_patch_3d.zlower;
+			artificial_patch.xupper = artificial_patch_3d.xupper;
+			artificial_patch.yupper = artificial_patch_3d.yupper;
+			artificial_patch.zupper = artificial_patch_3d.zupper;
+			artificial_patch.d3 = &artificial_patch_3d;
+			artificial_patch.refine_dim = 3;
+			artificial_patch_3d.user = &artificial_patch;
+		}
 
 		//shallow pach data
 		fclaw_patch_shallow_copy(glob,
