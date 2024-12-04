@@ -269,7 +269,7 @@ struct fclaw_options
     double max_refinement_ratio; /**< Maximum refinment ratio before partitioning and continuing refinement. */
 
     int partition_mode; /**< Partition mode */
-    sc_keyvalue_t *kv_regrid_mode; /**< sc_keyvalue needed for enum option type */
+    sc_keyvalue_t *kv_partition_mode; /**< sc_keyvalue needed for enum option type */
 };
 
 struct fclaw_global;
