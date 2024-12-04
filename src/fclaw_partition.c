@@ -34,31 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_options.h>
 
 static
-void patch_pack_cb(fclaw_domain_t * domain,
-                   fclaw_patch_t * patch, int blockno,
-                   int patchno, void *pack_data_here,
-                   void *user)
-{
-    fclaw_global_t *glob = (fclaw_global_t *) user;
-    fclaw_patch_partition_pack(glob,patch,
-                               blockno,patchno,
-                               pack_data_here);
-}
-
-static
-void patch_unpack_cb(fclaw_domain_t * domain,
-                     fclaw_patch_t * patch,
-                     int blockno, int patchno,
-                     void *unpack_data_from_here,
-                     void *user)
-{
-    fclaw_global_t *glob = (fclaw_global_t *) user;
-    fclaw_patch_partition_unpack(glob,domain,patch,
-                                 blockno,patchno,
-                                 unpack_data_from_here);
-}
-
-static
 void cb_partition_pack(fclaw_domain_t *domain,
                        fclaw_patch_t *patch,
                        int blockno,
@@ -99,6 +74,7 @@ void  cb_transfer(fclaw_domain_t * old_domain,
 
     fclaw_patch_shallow_copy(glob,old_domain,old_patch,new_domain,new_patch,
                              blockno,old_patchno,new_patchno);
+    fclaw_patch_data_delete(glob,old_domain,old_patch);
 }
 
 static
@@ -219,6 +195,33 @@ void partition_domain_legacy(fclaw_global_t* glob,
 
     fclaw_timer_stop (&glob->timers[FCLAW_TIMER_PARTITION]);
 }
+
+static
+void patch_pack_cb(fclaw_domain_t * domain,
+                   fclaw_patch_t * patch, int blockno,
+                   int patchno, void *pack_data_here,
+                   void *user)
+{
+    fclaw_global_t *glob = (fclaw_global_t *) user;
+    fclaw_patch_partition_pack(glob,patch,
+                               blockno,patchno,
+                               pack_data_here);
+    fclaw_patch_data_delete(glob,domain,patch);
+}
+
+static
+void patch_unpack_cb(fclaw_domain_t * domain,
+                     fclaw_patch_t * patch,
+                     int blockno, int patchno,
+                     void *unpack_data_from_here,
+                     void *user)
+{
+    fclaw_global_t *glob = (fclaw_global_t *) user;
+    fclaw_patch_partition_unpack(glob,domain,patch,
+                                 blockno,patchno,
+                                 unpack_data_from_here);
+}
+
 
 static
 void partition_domain(fclaw_global_t* glob,
